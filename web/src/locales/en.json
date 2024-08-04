@@ -7,6 +7,10 @@
     "sign-in-tip": "Already have an account?",
     "sign-up-tip": "Don't have an account yet?"
   },
+  "collaborators": {
+    "search-placeholder": "Add collaborators",
+    "search-empty": "No user found"
+  },
   "common": {
     "about": "About",
     "admin": "Admin",

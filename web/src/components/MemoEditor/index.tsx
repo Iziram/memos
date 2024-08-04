@@ -1,6 +1,6 @@
 import { Select, Option, Button, Divider } from "@mui/joy";
 import { isEqual } from "lodash-es";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { memo, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import useLocalStorage from "react-use/lib/useLocalStorage";
@@ -29,6 +29,7 @@ import RelationListView from "./RelationListView";
 import ResourceListView from "./ResourceListView";
 import { handleEditorKeydownWithMarkdownShortcuts, hyperlinkHighlightedText } from "./handlers";
 import { MemoEditorContext } from "./types";
+import CollaboratorsMenu from "./Editor/CollaboratorsMenu";
 
 export interface Props {
   className?: string;
@@ -77,8 +78,8 @@ const MemoEditor = (props: Props) => {
   const [contentCache, setContentCache] = useLocalStorage<string>(contentCacheKey, "");
   const referenceRelations = memoName
     ? state.relationList.filter(
-        (relation) => relation.memo === memoName && relation.relatedMemo !== memoName && relation.type === MemoRelation_Type.REFERENCE,
-      )
+      (relation) => relation.memo === memoName && relation.relatedMemo !== memoName && relation.type === MemoRelation_Type.REFERENCE,
+    )
     : state.relationList.filter((relation) => relation.type === MemoRelation_Type.REFERENCE);
   const workspaceMemoRelatedSetting =
     workspaceSettingStore.getWorkspaceSettingByKey(WorkspaceSettingKey.MEMO_RELATED)?.memoRelatedSetting ||
@@ -321,18 +322,18 @@ const MemoEditor = (props: Props) => {
         // Create memo or memo comment.
         const request = !parentMemoName
           ? memoStore.createMemo({
-              content,
-              visibility: state.memoVisibility,
-            })
+            content,
+            visibility: state.memoVisibility,
+          })
           : memoServiceClient
-              .createMemoComment({
-                name: parentMemoName,
-                comment: {
-                  content,
-                  visibility: state.memoVisibility,
-                },
-              })
-              .then((memo) => memo);
+            .createMemoComment({
+              name: parentMemoName,
+              comment: {
+                content,
+                visibility: state.memoVisibility,
+              },
+            })
+            .then((memo) => memo);
         const memo = await request;
         await memoServiceClient.setMemoResources({
           name: memo.name,
@@ -402,9 +403,8 @@ const MemoEditor = (props: Props) => {
       }}
     >
       <div
-        className={`${
-          className ?? ""
-        } relative w-full flex flex-col justify-start items-start bg-white dark:bg-zinc-800 px-4 pt-4 rounded-lg border border-gray-200 dark:border-zinc-700`}
+        className={`${className ?? ""
+          } relative w-full flex flex-col justify-start items-start bg-white dark:bg-zinc-800 px-4 pt-4 rounded-lg border border-gray-200 dark:border-zinc-700`}
         tabIndex={0}
         onKeyDown={handleKeyDown}
         onDrop={handleDropEvent}
@@ -454,6 +454,11 @@ const MemoEditor = (props: Props) => {
                 </Option>
               ))}
             </Select>
+
+            <div className="mx-2">
+              <CollaboratorsMenu />
+            </div>
+
           </div>
           <div className="shrink-0 flex flex-row justify-end items-center gap-2">
             {props.onCancel && (
