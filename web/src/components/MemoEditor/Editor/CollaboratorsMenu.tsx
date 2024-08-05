@@ -5,17 +5,16 @@ import React, { useState } from 'react';
 import { useTranslate } from "@/utils/i18n";
 import CollaboratorsList from "./CollaboratorsList";
 import CollaboratorsBadgesRow from "./CollaboratorsBadgesRow";
-import { User } from "@/types/proto/api/v1/user_service";
 
 interface Props {
     className?: string;
-    readonly?: boolean;
+    handleChange: (value: string[]) => void;
+    collaborators: string[];
 }
 
-const CollaboratorsMenu = ({ className, }: Props) => {
+const CollaboratorsMenu = ({ className, handleChange, collaborators }: Props) => {
     const t = useTranslate();
     const [searchValue, setSearchValue] = useState("");
-    const [selectedCollaborator, setSelectedCollaborator] = useState<User[]>([]);
 
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchValue(event.target.value);
@@ -39,15 +38,15 @@ const CollaboratorsMenu = ({ className, }: Props) => {
                             onChange={handleSearchChange}
                         />
                     </div>
-                    <CollaboratorsBadgesRow users={selectedCollaborator} deleteHandler={(user: User) => {
-                        setSelectedCollaborator(selectedCollaborator.filter((u) => u.id !== user.id));
+                    <CollaboratorsBadgesRow users={collaborators} deleteHandler={(uname: string) => {
+                        handleChange(collaborators.filter((username) => username !== uname));
                     }} />
-                    <CollaboratorsList filter={searchValue} onCollaboratorClick={(user: User) => {
-                        if (selectedCollaborator.find((u) => u.id === user.id)) {
-                            setSelectedCollaborator(selectedCollaborator.filter((u) => u.id !== user.id));
+                    <CollaboratorsList filter={searchValue} onCollaboratorClick={(username: string) => {
+                        if (collaborators.find((u) => u === username)) {
+                            handleChange(collaborators.filter((u) => u !== username));
                             return;
                         }
-                        setSelectedCollaborator([...selectedCollaborator, user]);
+                        handleChange([...collaborators, username]);
                     }} />
                 </div>
             </PopoverContent>

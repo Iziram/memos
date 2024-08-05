@@ -7,7 +7,7 @@ import { useTranslate } from '@/utils/i18n';
 
 type CollaboratorsListProps = {
     filter: string;
-    onCollaboratorClick: (user: User) => void;
+    onCollaboratorClick: (username: string) => void;
 };
 
 const CollaboratorsList: React.FC<CollaboratorsListProps> = ({ filter, onCollaboratorClick }) => {
@@ -47,7 +47,7 @@ const CollaboratorsList: React.FC<CollaboratorsListProps> = ({ filter, onCollabo
                             key={index}
                             user={user}
                             filter={filter}
-                            onClick={() => onCollaboratorClick(user)}
+                            onClick={() => onCollaboratorClick(user.username)}
                         />
                     ))}
                 </div>

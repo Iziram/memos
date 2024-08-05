@@ -1,6 +1,6 @@
 import { Select, Option, Button, Divider } from "@mui/joy";
 import { isEqual } from "lodash-es";
-import React, { memo, useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import useLocalStorage from "react-use/lib/useLocalStorage";
@@ -46,6 +46,7 @@ export interface Props {
 
 interface State {
   memoVisibility: Visibility;
+  collaborators: string[];
   resourceList: Resource[];
   relationList: MemoRelation[];
   isUploadingResource: boolean;
@@ -64,6 +65,7 @@ const MemoEditor = (props: Props) => {
   const currentUser = useCurrentUser();
   const [state, setState] = useState<State>({
     memoVisibility: Visibility.PRIVATE,
+    collaborators: [],
     resourceList: [],
     relationList: [],
     isUploadingResource: false,
@@ -117,6 +119,7 @@ const MemoEditor = (props: Props) => {
       setState((prevState) => ({
         ...prevState,
         memoVisibility: memo.visibility,
+        collaborators: memo.collaborators,
         resourceList: memo.resources,
         relationList: memo.relations,
       }));
@@ -294,11 +297,12 @@ const MemoEditor = (props: Props) => {
       if (memoName) {
         const prevMemo = await memoStore.getOrFetchMemoByName(memoName);
         if (prevMemo) {
-          const updateMask = ["content", "visibility"];
+          const updateMask = ["content", "visibility", "collaborators"];
           const memoPatch: Partial<Memo> = {
             name: prevMemo.name,
             content,
             visibility: state.memoVisibility,
+            collaborators: state.collaborators,
           };
           if (!isEqual(displayTime, prevMemo.displayTime)) {
             updateMask.push("display_time");
@@ -324,6 +328,7 @@ const MemoEditor = (props: Props) => {
           ? memoStore.createMemo({
             content,
             visibility: state.memoVisibility,
+            collaborators: state.collaborators,
           })
           : memoServiceClient
             .createMemoComment({
@@ -368,6 +373,13 @@ const MemoEditor = (props: Props) => {
   const handleEditorFocus = () => {
     editorRef.current?.focus();
   };
+
+  const handleCollaboratorsChange = (collaborators: string[]) => {
+    setState((prevState) => ({
+      ...prevState,
+      collaborators,
+    }));
+  }
 
   const editorConfig = useMemo(
     () => ({
@@ -456,7 +468,7 @@ const MemoEditor = (props: Props) => {
             </Select>
 
             <div className="mx-2">
-              <CollaboratorsMenu />
+              <CollaboratorsMenu handleChange={handleCollaboratorsChange} collaborators={state.collaborators} />
             </div>
 
           </div>

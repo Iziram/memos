@@ -1,21 +1,19 @@
-import UserAvatar from '@/components/UserAvatar';
-import { User } from '@/types/proto/api/v1/user_service';
 import React from 'react';
 
 type CollaboratorsBadgesRowProps = {
-    users: User[];
-    deleteHandler: (user: User) => void;
+    users: string[];
+    deleteHandler: (user: string) => void;
     readonly?: boolean;
 };
 
 const CollaboratorsBadgesRow: React.FC<CollaboratorsBadgesRowProps> = ({ users, deleteHandler, readonly }) => {
     return (
         <div className="flex overflow-x-auto max-w-xs gap-2 mt-2">
-            {users.map((user, index) => (
+            {users.map((username, index) => (
                 <div key={index} className="flex items-center bg-zinc-50 dark:bg-zinc-900 rounded-full px-2 py-1 text-sm">
-                    <span>@{user.username}</span>
+                    <span>@{username}</span>
                     {!readonly && (<button
-                        onClick={() => deleteHandler(user)}
+                        onClick={() => deleteHandler(username)}
                         className="ml-2 text-red-500 hover:text-red-700"
                     >
                         &times;
