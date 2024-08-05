@@ -200,6 +200,9 @@ message Memo {
 
   // The snippet of the memo content. Plain text only.
   string snippet = 19;
+
+  //The list of collaborators (list of User.username)
+  repeated string collaborators = 20;
 }
 
 message MemoProperty {
@@ -214,6 +217,8 @@ message CreateMemoRequest {
   string content = 1;
 
   Visibility visibility = 2;
+
+  repeated string collaborators = 3;
 }
 
 message ListMemosRequest {

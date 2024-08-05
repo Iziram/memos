@@ -46,9 +46,10 @@ type Memo struct {
 	UpdatedTs int64
 
 	// Domain specific fields
-	Content    string
-	Visibility Visibility
-	Payload    *storepb.MemoPayload
+	Content       string
+	Visibility    Visibility
+	Payload       *storepb.MemoPayload
+	Collaborators []string
 
 	// Composed fields
 	Pinned   bool

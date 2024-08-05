@@ -42,10 +42,11 @@ func (s *APIV1Service) CreateMemo(ctx context.Context, request *v1pb.CreateMemoR
 	}
 
 	create := &store.Memo{
-		UID:        shortuuid.New(),
-		CreatorID:  user.ID,
-		Content:    request.Content,
-		Visibility: convertVisibilityToStore(request.Visibility),
+		UID:           shortuuid.New(),
+		CreatorID:     user.ID,
+		Content:       request.Content,
+		Visibility:    convertVisibilityToStore(request.Visibility),
+		Collaborators: request.Collaborators,
 	}
 	workspaceMemoRelatedSetting, err := s.Store.GetWorkspaceMemoRelatedSetting(ctx)
 	if err != nil {
@@ -67,6 +68,10 @@ func (s *APIV1Service) CreateMemo(ctx context.Context, request *v1pb.CreateMemoR
 	}
 	create.Payload = &storepb.MemoPayload{
 		Property: property,
+	}
+	err = s.checkCollaboratorsList(ctx, create.Collaborators)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid collaborators list: %v", err)
 	}
 
 	memo, err := s.Store.CreateMemo(ctx, create)
@@ -293,6 +298,11 @@ func (s *APIV1Service) UpdateMemo(ctx context.Context, request *v1pb.UpdateMemoR
 				Pinned: request.Memo.Pinned,
 			}); err != nil {
 				return nil, status.Errorf(codes.Internal, "failed to upsert memo organizer")
+			}
+		} else if path == "collaborators" {
+			err := s.checkCollaboratorsList(ctx, request.Memo.Collaborators)
+			if err != nil {
+				return nil, status.Errorf(codes.InvalidArgument, "invalid collaborators list: %v", err)
 			}
 		}
 	}
@@ -862,6 +872,20 @@ func convertVisibilityToStore(visibility v1pb.Visibility) store.Visibility {
 	default:
 		return store.Private
 	}
+}
+
+func (s *APIV1Service) checkCollaboratorsList(ctx context.Context, collaborators []string) error {
+	// Check if each string is a valid username
+	for _, collaborator := range collaborators {
+		finder := &store.FindUser{
+			Username: &collaborator,
+		}
+		_, err := s.Store.GetUser(ctx, finder)
+		if err != nil {
+			return status.Errorf(codes.InvalidArgument, "invalid collaborator: %v", err)
+		}
+	}
+	return nil
 }
 
 func (s *APIV1Service) buildMemoFindWithFilter(ctx context.Context, find *store.FindMemo, filter string) error {
